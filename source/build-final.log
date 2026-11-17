@@ -1,0 +1,14 @@
+grep: -P supports only unibyte and UTF-8 locales
+grep: -P supports only unibyte and UTF-8 locales
+
+🔨 Building Android APK...
+Version:  ()
+
+[0;32m[INFO][0m Checking prerequisites...
+[0;31m[ERROR][0m Missing required tools/files:
+  - javac
+  - aapt
+  - zipalign
+  - apksigner
+  - android.jar
+  - r8.jar

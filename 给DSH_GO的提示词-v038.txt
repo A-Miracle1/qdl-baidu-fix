@@ -1,0 +1,70 @@
+# DSH Go: 构建 v0.38-final 并测试
+
+你好,这是 **v0.38-final 最终修复版**,已经找到并修复了百度网盘的问题。
+
+## 问题原因
+
+**User-Agent 的锅,不是 Cookie 的锅!**
+
+百度网盘对移动端 UA (`netdisk`) 只返回 49577 字节通用页,
+必须用桌面浏览器 UA 才能拿到 74917 字节完整页。
+
+## 已修复
+
+在 `MainActivity.java` 中:
+1. 添加了 `BD_WEB_UA` (Chrome Windows UA)
+2. `bdGetRaw()` 改用 `BD_WEB_UA` 抓分享页
+3. API 调用仍然用 `BD_API_UA = "netdisk"`
+
+版本号: 0.38-final (versionCode 39)
+
+## 构建步骤
+
+```bash
+# 1. 解压
+cd ~
+tar -xzf qdl-fix-v038-final.tar.gz
+cd qdl-fix/source
+
+# 2. 构建 (6 秒)
+bash build-enhanced.sh
+
+# 3. 安装
+cp app.apk /sdcard/Download/DSH-Go/网盘直链下载-0.38-final.apk
+# 然后手动安装
+
+# 4. 测试
+# 测试链接: https://pan.baidu.com/s/1TwY2Pb5mHZOjpyiiOUTCIg?pwd=v357
+# 提取码: v357
+
+# 5. 查看日志
+cat /sdcard/Download/DSH-Go/qdl.log
+```
+
+## 验收标准
+
+关键日志行必须是:
+
+```
+bdGetRaw 返回 200 长度=74917         ← 之前是 49577
+百度分享页 74917 字节，locals=true   ← 之前 locals=false
+title=小王不AI干正事_免费高速下载    ← 完整标题
+locals 解析：shareid=... uk=... files=1
+开始下载...                          ← 能走到这里就成功了
+```
+
+## 如果还是失败
+
+提供完整的 `/sdcard/Download/DSH-Go/qdl.log`,重点看:
+1. `bdGetRaw 返回 200 长度=?` 这个数字
+2. `locals=true` 还是 `false`
+3. `title=` 后面的内容
+
+---
+
+测试链接: https://pan.baidu.com/s/1TwY2Pb5mHZOjpyiiOUTCIg?pwd=v357
+预期页面大小: 74917 字节 (73999-75000 都正常)
+预期 locals: true
+预期标题: 小王不AI干正事_免费高速下载
+
+祝测试成功! 🚀

@@ -1,0 +1,20 @@
+11-17 12:23:01 ===== app start（0.25）
+11-17 12:23:08 调试模式 开
+11-17 12:23:12 ===== start [baidu] https://pan.baidu.com/s/1TwY2Pb5mHZOjpyiiOUTCIg?pwd=v357
+11-17 12:23:12 百度分享 TwY2Pb5mHZOjpyiiOUTCIg（有提取码）
+11-17 12:23:12 百度 verify 成功 randsk=有
+11-17 12:23:12 百度 bdstoken 获取成功
+11-17 12:23:13 百度分享页 49576 字节，locals=false title=百度网盘-分享文件
+11-17 12:23:13 locals 失败，改用 wxlist：百度：分享页解析失败，可能要在网页里过一次验证
+11-17 12:23:13 ✗ 百度：2 参数错误（可能缺 bdstoken）
+11-17 12:23:13 ===== end (cancel=false, failed=true)
+11-17 12:29:07 ===== app start（0.25）
+11-17 12:29:12 调试模式 开
+11-17 12:29:16 ===== start [baidu] https://pan.baidu.com/s/1TwY2Pb5mHZOjpyiiOUTCIg?pwd=v357
+11-17 12:29:16 百度分享 TwY2Pb5mHZOjpyiiOUTCIg（有提取码）
+11-17 12:29:16 百度 verify 成功 randsk=有
+11-17 12:29:17 百度 bdstoken 获取成功
+11-17 12:29:17 百度分享页 49576 字节，locals=false title=百度网盘-分享文件
+11-17 12:29:17 locals 失败，改用 wxlist：百度：分享页解析失败，可能要在网页里过一次验证
+11-17 12:29:18 ✗ 百度：2 参数错误（可能缺 bdstoken）
+11-17 12:29:18 ===== end (cancel=false, failed=true)

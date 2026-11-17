@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 基础配置 -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- 信任系统证书 -->
+            <certificates src="system" />
+            <!-- 信任用户安装的证书 (调试用) -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- 针对特定域名的配置 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- 百度网盘 -->
+        <domain includeSubdomains="true">pan.baidu.com</domain>
+        <domain includeSubdomains="true">pcs.baidu.com</domain>
+        <domain includeSubdomains="true">d.pcs.baidu.com</domain>
+
+        <!-- 夸克网盘 -->
+        <domain includeSubdomains="true">pan.quark.cn</domain>
+        <domain includeSubdomains="true">drive.uc.cn</domain>
+        <domain includeSubdomains="true">ucdl.25u.com</domain>
+
+        <!-- 123网盘 -->
+        <domain includeSubdomains="true">www.123pan.com</domain>
+        <domain includeSubdomains="true">www.123865.com</domain>
+
+        <!-- 迅雷 -->
+        <domain includeSubdomains="true">pan.xunlei.com</domain>
+
+        <!-- localhost (调试用) -->
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- 调试配置 (生产环境应移除) -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- 调试时信任所有证书 -->
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

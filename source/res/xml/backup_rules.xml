@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- 包含的数据 -->
+    <include domain="sharedpref" path="." />
+
+    <!-- 排除的数据 -->
+    <exclude domain="sharedpref" path="device_preferences.xml" />
+    <exclude domain="database" path="." />
+    <exclude domain="file" path="." />
+    <exclude domain="cache" path="." />
+</full-backup-content>

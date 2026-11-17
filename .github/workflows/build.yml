@@ -1,0 +1,61 @@
+name: 构建百度网盘修复版 APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置 JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: 安装 Android SDK
+      uses: android-actions/setup-android@v2
+
+    - name: 安装 Android 构建工具
+      run: |
+        sdkmanager "platform-tools" "platforms;android-23" "build-tools;30.0.3"
+
+    - name: 下载 R8/D8
+      run: |
+        mkdir -p /tmp/build
+        wget https://maven.google.com/com/android/tools/r8/8.2.42/r8-8.2.42.jar -O /tmp/build/r8.jar
+
+    - name: 构建 APK
+      working-directory: ./source
+      run: |
+        # 修改构建脚本以使用下载的 r8.jar
+        sed -i 's|/root/build/r8.jar|/tmp/build/r8.jar|g' build.sh
+        bash build.sh
+
+    - name: 签名 APK
+      working-directory: ./source
+      run: |
+        # APK 已在 build.sh 中签名
+        mv app.apk 网盘直链下载-0.39-beta.apk
+
+    - name: 上传 APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: 网盘直链下载-0.39-beta
+        path: source/网盘直链下载-0.39-beta.apk
+
+    - name: 创建 Release（如果是 tag）
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: source/网盘直链下载-0.39-beta.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

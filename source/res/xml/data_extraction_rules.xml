@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- 云备份规则 -->
+        <include domain="sharedpref" path="." />
+        <exclude domain="sharedpref" path="device_preferences.xml" />
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- 设备迁移规则 -->
+        <include domain="sharedpref" path="." />
+        <exclude domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>

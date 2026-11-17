@@ -1,0 +1,103 @@
+网盘直链下载 v0.37-beta 交付清单
+==========================================
+
+📦 压缩包: qdl-fix-v037-final.tar.gz
+
+📋 包含内容:
+
+1. 源码文件
+   ✓ source/src/com/dsh/qdl/MainActivity.java (已添加百度调试日志)
+   ✓ source/src/com/dsh/qdl/KeepAliveService.java
+   ✓ source/assets/index.html (现代化 UI)
+
+2. 资源文件
+   ✓ source/res/values/strings.xml
+   ✓ source/res/xml/network_security_config.xml (网络安全配置)
+   ✓ source/res/xml/file_paths.xml (FileProvider)
+   ✓ source/res/xml/backup_rules.xml (备份规则)
+   ✓ source/res/xml/data_extraction_rules.xml (数据迁移)
+   ✓ source/res/mipmap-*/ic_launcher.png (各尺寸图标)
+
+3. 配置文件
+   ✓ source/AndroidManifest.xml (版本 38 / 0.37-beta)
+   ✓ source/AndroidManifest-enhanced.xml (增强版,可选)
+   ✓ source/proguard-rules.pro (混淆规则)
+   ✓ source/qdl.keystore (签名密钥,密码: qdlqdl123)
+
+4. 构建脚本
+   ✓ source/build.sh (原始构建脚本)
+   ✓ source/build-enhanced.sh (增强版,推荐使用)
+   ✓ source/build-windows.ps1 (Windows 构建脚本)
+
+5. 文档
+   ✓ README_DELIVERY.md (项目交付总结)
+   ✓ BUILD_FINAL.md (最终构建指南)
+   ✓ BUILD_AND_TEST.md (测试文档)
+   ✓ BUILD_BEST_PRACTICES.md (构建最佳实践)
+   ✓ CHANGELOG.md (更新日志)
+   ✓ ISSUE.md (问题描述)
+   ✓ PROMPT.md (原始需求)
+   ✓ README.md (项目说明)
+   ✓ ENVIRONMENT.md (环境配置)
+
+6. 测试工具
+   ✓ test-baidu-flow.js (后台测试脚本,已验证通过)
+
+7. DSH Go 任务
+   ✓ DSH_GO_PROMPT.md (详细构建和测试步骤)
+
+🎯 快速开始 (DSH Go):
+
+1. 解压压缩包
+   tar -xzf qdl-fix-v037-final.tar.gz
+   cd qdl-fix
+
+2. 阅读任务提示词
+   cat DSH_GO_PROMPT.md
+
+3. 按照提示词完成构建和测试
+
+🔑 关键信息:
+
+版本: 0.37-beta (versionCode 38)
+包名: com.dsh.qdl
+签名密钥: qdl.keystore
+密钥密码: qdlqdl123
+最低 Android: 5.0 (API 21)
+目标 Android: 9.0 (API 28)
+
+测试链接: https://pan.baidu.com/s/1TwY2Pb5mHZOjpyiiOUTCIg?pwd=v357
+提取码: v357
+
+📊 验收标准:
+
+功能:
+- [ ] 百度网盘测试链接能成功下载
+- [ ] 日志显示 bdClnd长度=52
+- [ ] 日志显示 Cookie长度=59
+- [ ] 日志显示分享页 73999 字节
+- [ ] 日志显示 locals=true
+
+UI:
+- [ ] 深色主题 (#0a0e14)
+- [ ] 标题显示 "0.37 beta"
+- [ ] 按钮悬停动画
+- [ ] 渐变进度条
+- [ ] 续传提示高亮
+
+🚀 构建命令:
+
+cd source
+bash build-enhanced.sh
+
+📱 安装:
+
+cp source/app.apk /sdcard/Download/DSH-Go/网盘直链下载-0.37-beta.apk
+
+📋 收集日志:
+
+cat /sdcard/Download/DSH-Go/qdl.log
+
+---
+构建日期: 2026-11-17
+开发者: Kiro AI Assistant
