@@ -759,7 +759,7 @@ public class MainActivity extends Activity {
                 public void run() {
                     loginMode = true;
                     // 百度登录页在桌面 UA 下验证码弹层会错位/挡住按钮，用手机默认 UA
-                    web.getSettings().setUserAgentString("baidu".equals(loginPlatform) ? defaultUA : UA_DESKTOP);
+                    web.getSettings().setUserAgentString(UA_DESKTOP);
                     if ("xunlei".equals(loginPlatform)) {
                         xlForceLogout = true;
                         web.loadUrl("https://pan.xunlei.com/");

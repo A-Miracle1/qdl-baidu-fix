@@ -20,19 +20,66 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
-    - name: Download Android Build Tools
+    - name: Setup Android SDK
       run: |
+        mkdir -p $ANDROID_HOME
         cd tools
-        wget -q https://dl.google.com/android/repository/build-tools_r30.0.3-linux.zip
-        unzip -q build-tools_r30.0.3-linux.zip
-        wget -q https://dl.google.com/android/repository/platform-28_r06.zip
-        unzip -q platform-28_r06.zip
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip -q commandlinetools-linux-*.zip
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+        yes | sdkmanager --licenses || true
+        sdkmanager "platforms;android-28" "build-tools;30.0.3"
+
+        # Download R8
+        wget -q https://maven.google.com/com/android/tools/r8/8.2.42/r8-8.2.42.jar -O r8.jar
+      env:
+        ANDROID_HOME: ${{ github.workspace }}/android-sdk
 
     - name: Build APK
       run: |
         cd source
-        chmod +x ../tools/build.sh
-        bash ../tools/build.sh
+        export ANDROID_HOME=${{ github.workspace }}/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/build-tools/30.0.3
+
+        # Compile Java
+        rm -rf out outdex
+        mkdir -p out outdex
+        javac -nowarn -source 8 -target 8 \
+          -bootclasspath $ANDROID_HOME/platforms/android-28/android.jar \
+          -d out \
+          src/com/dsh/qdl/*.java
+
+        # Convert to DEX
+        java -cp ../tools/r8.jar com.android.tools.r8.D8 \
+          --lib $ANDROID_HOME/platforms/android-28/android.jar \
+          --min-api 21 \
+          --output outdex \
+          $(find out -name '*.class')
+
+        # Package APK
+        aapt package -f \
+          -M AndroidManifest.xml \
+          -S res \
+          -I $ANDROID_HOME/platforms/android-28/android.jar \
+          -A assets \
+          -F app.unsigned.apk
+
+        (cd outdex && aapt add ../app.unsigned.apk classes.dex)
+
+        # Align and sign
+        zipalign -f 4 app.unsigned.apk app-aligned.apk
+        apksigner sign \
+          --ks qdl.keystore \
+          --ks-pass pass:qdlqdl123 \
+          --key-pass pass:qdlqdl123 \
+          --out app.apk \
+          app-aligned.apk
+
+        echo "Built: $(pwd)/app.apk"
+        ls -lh app.apk
 
     - name: Upload APK
       uses: actions/upload-artifact@v4

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>网盘直链下载</title>
+<style>
+  :root{
+    --bg:#0a0e14;--card:#151b24;--card-hover:#1a2129;--line:#1f2937;
+    --txt:#e5e9f0;--mut:#7e8896;--acc:#3b82f6;--acc-hover:#2563eb;
+    --ok:#10b981;--ok-bg:#064e3b;--bad:#ef4444;--bad-bg:#7f1d1d;
+    --shadow:0 4px 12px rgba(0,0,0,0.2);--shadow-lg:0 8px 24px rgba(0,0,0,0.3)
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.5 -apple-system,"Noto Sans SC",system-ui,sans-serif;
+       padding:18px 16px 40px;min-height:100vh}
+  h1{font-size:20px;margin:0 0 20px;font-weight:700;letter-spacing:-0.02em;
+     background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;
+     -webkit-text-fill-color:transparent;background-clip:text}
+  h1 small{font-size:12px;color:var(--mut);font-weight:400;letter-spacing:normal;
+           -webkit-text-fill-color:var(--mut)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+        padding:16px;margin-bottom:14px;box-shadow:var(--shadow);
+        transition:all 0.2s ease}
+  .card:hover{background:var(--card-hover);box-shadow:var(--shadow-lg)}
+  .row{display:flex;gap:10px;align-items:center}
+  .between{justify-content:space-between}
+  .muted{color:var(--mut);font-size:12.5px;line-height:1.4}
+  .acct{padding:10px 0;border-bottom:1px solid var(--line);transition:padding 0.2s}
+  .acct:last-child{border-bottom:0}
+  .acct:hover{padding:12px 0}
+  input[type=text],textarea{width:100%;background:#0a0e14;border:1px solid var(--line);
+    color:var(--txt);border-radius:12px;padding:12px 14px;font-size:14px;
+    outline:none;transition:all 0.2s}
+  input[type=text]:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+  textarea{height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px;resize:vertical}
+  button{border:0;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;
+         color:#fff;background:var(--acc);cursor:pointer;transition:all 0.2s;
+         box-shadow:0 2px 8px rgba(59,130,246,0.2)}
+  button:hover:not(:disabled){background:var(--acc-hover);transform:translateY(-1px);
+                               box-shadow:0 4px 12px rgba(59,130,246,0.3)}
+  button:active:not(:disabled){transform:translateY(0);box-shadow:0 2px 6px rgba(59,130,246,0.2)}
+  button.sm{padding:8px 14px;font-size:13px}
+  button.ghost{background:rgba(255,255,255,0.05);color:var(--txt);box-shadow:none}
+  button.ghost:hover:not(:disabled){background:rgba(255,255,255,0.08)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .bar{height:10px;background:rgba(255,255,255,0.03);border-radius:99px;
+       overflow:hidden;margin:14px 0 10px;border:1px solid var(--line)}
+  .bar > i{display:block;height:100%;width:0;
+           background:linear-gradient(90deg,#3b82f6,#8b5cf6,#10b981);
+           transition:width 0.3s ease;box-shadow:0 0 12px rgba(59,130,246,0.4)}
+  #log{margin-top:12px;max-height:28vh;overflow:auto;font-size:12.5px;
+       color:var(--mut);white-space:pre-wrap;word-break:break-all;
+       line-height:1.6;padding:8px;background:rgba(0,0,0,0.2);border-radius:8px}
+  #log::-webkit-scrollbar{width:6px}
+  #log::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:99px;
+         font-size:11.5px;font-weight:600;letter-spacing:0.02em}
+  .badge:not(.off){background:var(--ok-bg);color:var(--ok)}
+  .badge.off{background:var(--bad-bg);color:var(--bad)}
+  .hidden{display:none}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:14px;
+         background:rgba(0,0,0,0.2);border:1px solid var(--line);
+         border-radius:12px;padding:12px 14px}
+  .stats .k{color:var(--mut);font-size:11.5px;text-transform:uppercase;
+            letter-spacing:0.05em}
+  .stats .v{color:var(--txt);font-size:13.5px;font-weight:600;text-align:right;
+            font-variant-numeric:tabular-nums}
+  .kv{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .lbl{color:var(--mut);font-size:12px}
+</style>
+</head>
+<body>
+<h1>网盘直链下载 <small>0.38 final</small></h1>
+
+<div class="card">
+  <div class="acct row between">
+    <div><b>夸克网盘</b><div class="muted">pan.quark.cn</div></div>
+    <div class="row"><span class="badge off" id="qBadge">未登录</span><button class="sm ghost" id="qLogin">登录</button></div>
+  </div>
+  <div class="acct row between">
+    <div><b>UC 网盘</b><div class="muted">drive.uc.cn</div></div>
+    <div class="row"><span class="badge off" id="uBadge">未登录</span><button class="sm ghost" id="uLogin">登录</button></div>
+  </div>
+  <div class="acct row between">
+    <div><b>123 云盘</b><div class="muted">123pan.com / 123865.com · 匿名下载看分享方流量</div></div>
+    <div class="row"><span class="badge off" id="tBadge">未登录</span><button class="sm ghost" id="tLogin">登录</button></div>
+  </div>
+  <div class="acct row between">
+    <div><b>百度网盘</b><div class="muted">pan.baidu.com · 需要登录获取 BDUSS</div></div>
+    <div class="row"><span class="badge off" id="bBadge">未登录</span><button class="sm ghost" id="bLogin">登录</button></div>
+  </div>
+  <div class="acct row between">
+    <div><b>迅雷云盘</b><div class="muted">pan.xunlei.com · 验证码过期请重新登录</div></div>
+    <div class="row"><span class="badge off" id="xBadge">未登录</span><button class="sm ghost" id="xLogin">登录</button></div>
+  </div>
+  <div class="btn-row">
+    <button class="ghost sm" id="btnManual">📋 手动粘贴 Cookie</button>
+    <button class="ghost sm" id="btnDebug">🔧 调试：关</button>
+  </div>
+  <div id="manualBox" class="hidden" style="margin-top:10px">
+    <textarea id="cookieInput" placeholder="粘贴完整 Cookie 字符串...&#10;例如: __pus=...; __puus=...; kpn=..."></textarea>
+    <div class="btn-row"><button class="sm ghost" id="saveQ">夸克</button><button class="sm ghost" id="saveU">UC</button><button class="sm ghost" id="saveT">123</button><button class="sm ghost" id="saveB">百度</button></div>
+  </div>
+</div>
+
+<div class="card">
+  <b style="font-size:15px">📂 分享链接</b>
+  <div class="muted" style="margin:6px 0 10px">支持夸克/UC/123/迅雷/百度 · 有提取码的链接请连 ?pwd=xxxx 一起粘贴</div>
+  <input type="text" id="link" placeholder="https://pan.quark.cn/s/..." autocomplete="off" spellcheck="false">
+  <div class="btn-row">
+    <button id="btnStart" style="flex:1">🚀 开始下载</button>
+    <button id="btnCancel" class="ghost" disabled>⏸️ 暂停</button>
+    <button id="btnDiscard" class="ghost" disabled>❌ 取消</button>
+  </div>
+  <div class="bar"><i id="barFill"></i></div>
+  <div class="row between">
+    <span class="muted" id="statusText">等待开始...</span>
+    <span class="muted" id="speedText"></span>
+  </div>
+
+  <div class="stats">
+    <div class="kv"><span class="k">阶段</span><span class="v" id="sPhase">待机</span></div>
+    <div class="kv"><span class="k">分段</span><span class="v" id="sParts">—</span></div>
+    <div class="kv"><span class="k">已下载</span><span class="v" id="sDone">—</span></div>
+    <div class="kv"><span class="k">活跃</span><span class="v" id="sActive">—</span></div>
+    <div class="kv"><span class="k">峰值</span><span class="v" id="sPeak">—</span></div>
+    <div class="kv"><span class="k">失败</span><span class="v" id="sFails">0</span></div>
+    <div class="kv"><span class="k">用时</span><span class="v" id="sElapsed">—</span></div>
+    <div class="kv"><span class="k">剩余</span><span class="v" id="sEta">—</span></div>
+    <div class="kv"><span class="k">服务器</span><span class="v" id="sHost">—</span></div>
+    <div class="kv"><span class="k">文件</span><span class="v" id="sName">—</span></div>
+  </div>
+
+  <div class="muted" id="pendingHint" style="margin-top:10px;padding:10px;background:rgba(59,130,246,0.1);border-radius:8px;border-left:3px solid var(--acc)"></div>
+  <div class="btn-row"><button class="ghost sm" id="btnCopyLog">📋 复制日志</button></div>
+  <div id="log"></div>
+</div>
+
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var bridge = window.AndroidBridge;
+
+  function setText(id, v) { if (v !== undefined && v !== null && v !== '') el(id).textContent = v; }
+
+  function refreshLogin() {
+    var q = bridge.logged('quark'), u = bridge.logged('uc'), t123 = bridge.logged('123'), x = bridge.logged('xunlei'), b = bridge.logged('baidu');
+    el('qBadge').className = 'badge' + (q ? '' : ' off'); el('qBadge').textContent = q ? '已登录' : '未登录';
+    el('uBadge').className = 'badge' + (u ? '' : ' off'); el('uBadge').textContent = u ? '已登录' : '未登录';
+    el('qLogin').textContent = q ? '重新登录' : '登录';
+    el('uLogin').textContent = u ? '重新登录' : '登录';
+    el('tBadge').className = 'badge' + (t123 ? '' : ' off'); el('tBadge').textContent = t123 ? '已登录' : '未登录';
+    el('tLogin').textContent = t123 ? '重新登录' : '登录';
+    el('xBadge').className = 'badge' + (x ? '' : ' off'); el('xBadge').textContent = x ? '已登录' : '未登录';
+    el('bBadge').className = 'badge' + (b ? '' : ' off'); el('bBadge').textContent = b ? '已登录' : '未登录';
+    el('bLogin').textContent = b ? '重新登录' : '登录';
+    el('xLogin').textContent = x ? '重新登录' : '登录';
+    try {
+      var p = bridge.pendingInfo();
+      el('pendingHint').textContent = p ? ('上次没下完：' + p.split('|')[0] + '（' + p.split('|')[1] + '%），粘同一个链接再点开始就能续传') : '';
+    } catch (e) { }
+  }
+
+  window.ui = {
+    log: function (m) {
+      var d = el('log'), line = document.createElement('div');
+      line.textContent = m; d.appendChild(line); d.scrollTop = d.scrollHeight;
+    },
+    status: function (m) { el('statusText').textContent = m; },
+    progress: function (pct, speed, name) {
+      el('barFill').style.width = Math.max(0, Math.min(100, pct)) + '%';
+      el('statusText').textContent = (name ? name + ' · ' : '') + pct + '%';
+      el('speedText').textContent = speed || '';
+    },
+    stats: function (json) {
+      try {
+        var s = JSON.parse(json);
+        setText('sPhase', s.phase); setText('sParts', String(s.parts || '—')); setText('sDone', s.doneText);
+        setText('sActive', String(s.active || 0)); setText('sPeak', s.peak); setText('sFails', String(s.fails || 0));
+        setText('sElapsed', s.elapsed); setText('sEta', s.eta); setText('sHost', s.host); setText('sName', s.name);
+      } catch (e) { }
+    },
+    finish: function () { el('btnStart').disabled = false; el('btnCancel').disabled = true; el('btnDiscard').disabled = true; refreshLogin(); },
+    needLogin: function (p) {
+      var nm = p === 'uc' ? ' UC 网盘' : (p === 'xunlei' ? '迅雷云盘' : (p === '123' ? ' 123 云盘' : (p === 'baidu' ? '百度网盘' : '夸克网盘')));
+      window.ui.status('请先登录' + nm);
+    },
+    busyStart: function () {
+      el('btnStart').disabled = true; el('btnCancel').disabled = false; el('btnDiscard').disabled = false;
+      el('statusText').textContent = '准备中…'; el('log').textContent = '';
+    },
+    cookieSaved: function (p, ok) {
+      var nm = p === 'uc' ? 'UC' : (p === '123' ? '123 云盘' : (p === 'baidu' ? '百度网盘' : '夸克'));
+      window.ui.log(ok ? ('✓ ' + nm + ' cookie 已保存') : '✗ cookie 不完整'); refreshLogin();
+    }
+  };
+
+  el('qLogin').onclick = function () { bridge.openLogin('quark'); };
+  el('uLogin').onclick = function () { bridge.openLogin('uc'); };
+  el('tLogin').onclick = function () { bridge.openLogin('123'); };
+  el('xLogin').onclick = function () { bridge.openLogin('xunlei'); };
+  el('bLogin').onclick = function () { bridge.openLogin('baidu'); };
+  el('saveB').onclick = function () { bridge.saveCookie('baidu', el('cookieInput').value); };
+  el('btnManual').onclick = function () { el('manualBox').classList.toggle('hidden'); };
+  el('saveQ').onclick = function () { bridge.saveCookie('quark', el('cookieInput').value); };
+  el('saveU').onclick = function () { bridge.saveCookie('uc', el('cookieInput').value); };
+  el('saveT').onclick = function () { bridge.saveCookie('123', el('cookieInput').value); };
+  el('btnCancel').onclick = function () { bridge.cancel(); window.ui.status('已暂停，粘同一链接再开始可续传'); };
+  el('btnDiscard').onclick = function () { bridge.discard(); window.ui.status('已取消，半成品已删除'); };
+  el('btnCopyLog').onclick = function () { bridge.copy(el('log').innerText); };
+
+  var dbg = false;
+  el('btnDebug').onclick = function () {
+    dbg = !dbg;
+    el('btnDebug').textContent = dbg ? '🔧 调试：开' : '🔧 调试：关';
+    el('btnDebug').style.background = dbg ? 'var(--acc)' : '';
+    el('btnDebug').style.color = dbg ? '#fff' : '';
+    bridge.setDebug(dbg);
+    window.ui.log(dbg ? '✓ 调试模式已开启：下载前测速 32/64/96/128 段（各 15 秒）' : '✓ 调试模式已关闭');
+  };
+
+  el('btnStart').onclick = function () {
+    var link = el('link').value.trim();
+    if (!link) { window.ui.status('先粘贴分享链接'); return; }
+    el('log').textContent = '';
+    el('barFill').style.width = '0%';
+    el('btnStart').disabled = true;
+    el('btnCancel').disabled = false;
+    el('btnDiscard').disabled = false;
+    bridge.start(link);
+  };
+
+  refreshLogin();
+})();
+</script>
+</body>
+</html>
